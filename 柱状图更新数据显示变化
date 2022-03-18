@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="https://cdn.staticfile.org/echarts/5.3.1/echarts.min.js"></script>
+
+</head>
+<body>
+	<div id="main" style="width:600px;height: 400px"></div>
+	<script type="text/javascript">
+		var myChart = echarts.init(document.getElementById('main'))
+		var option={
+			xAxis: {
+			    data: ['A', 'B', 'C', 'D', 'E']
+			  },
+			yAxis: {},
+			series:[{
+				data:[20,40,30,10,5],
+				type:'bar',
+				realtimeSort:true,
+
+				label:{
+					show:true,
+					position: 'top',
+					valueAnimation: true 
+				}
+			}] 
+
+		}
+		myChart.setOption(option)
+		function update(){
+			var data=option.series[0].data;
+			for(var i=0;i<5;i++){
+				data[i]=data[i]+Math.round(Math.random()*100)
+			}
+			myChart.setOption(option)
+		}
+		setInterval(function(){
+			update();
+		},1000) 
+	</script>
+</body>
+</html>
