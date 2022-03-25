@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.1/dist/echarts.min.js"></script>
+    </head>
+    <body>
+        <div id="container" style="width:800px;height: 600px;"></div>     
+        <script type="text/javascript">
+			var dom = document.getElementById("container");
+			var myChart = echarts.init(dom);
+			var option = {};
+			function getbubbleSortProcess(arr) {
+			    var process=[];
+			    var len = arr.length;
+			    for (var i = 0; i < len - 1; i++) {
+			        for (var j = 0; j < len - 1 - i; j++) {
+			            if (arr[j] > arr[j+1]) {       
+			                var temp = arr[j+1];        // 元素交换
+			                arr[j+1] = arr[j];
+			                arr[j] = temp;
+			                process.push([j,true]) //process的每一个元素为一个二维数组：[正在排序的元素的索引,是否交换]
+			            }else{
+			            	process.push([j,false])
+			            }
+			        }
+			    }
+			    return process;
+			}
+
+			function sorting(k,data){
+
+			    var j=process[k][0];
+			    var isSwap=process[k][1];
+			    for(var i = 0;i<data.length;i++){
+			    	data[i].itemStyle.color=colors[0];//还原所有颜色
+			    }
+			    data[j].itemStyle.color=colors[1];
+			    data[j+1].itemStyle.color=colors[1];
+			    if(isSwap){
+			    	var temp = data[j].value;
+			        data[j].value = data[j+1].value;
+			        data[j+1].value = temp;
+			    }
+
+			    myChart.setOption(option);
+			    if(k<process.length-1){
+			    	setTimeout(function(){sorting(k+1,data)},500);
+			    }
+			}
+
+			var arr=[];
+			var colors=['#5470c6','#a90000'];
+			for(var i=0;i<10;i++){
+			  var r=Math.round(Math.random()*50)
+			  arr.push({
+			            value:r,
+			            itemStyle:{
+			              color:colors[0] //统一颜色
+			              }
+			          })
+			}
+			option = {
+			  xAxis: {
+			    type: 'category'
+			  },
+			  yAxis: {
+			    type: 'value'
+			  },
+			  series: [
+			    {
+			      data: arr,
+			      type: 'bar',
+			      label:{
+			        show:true
+			      }
+			    }
+			  ]
+			};
+			myChart.setOption(option);//初始化渲染
+			
+			var arr_value = [];
+			for(var i=0;i<arr.length;i++){
+				arr_value.push(arr[i].value)
+			}
+			var process = getbubbleSortProcess(arr_value);//获取排序队列
+			
+			sorting(0,option.series[0].data); //开始排序，从process[0]开始执行
+        </script>
+    </body>
+</html>
+    
