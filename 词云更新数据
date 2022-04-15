@@ -1,0 +1,109 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src='echarts.min.js'></script>
+        <script src='echarts-wordcloud.min.js'></script>
+        <script src='Zsy.v2.js'></script>
+    </head>
+    <body>
+    	<textarea id="mydata" style="width: 800px;height: 200px;"></textarea>
+    	<p>请选择region.json文件</p>
+        <input type="file" onchange="readFile(this.files)"/>
+        <button onclick="echartsRender()">执行渲染</button>
+        <div id="container"></div>
+        <script>
+
+        	var myData=[]; //全局变量用于存储[{"name":"汽车","value":928},{...},...]的字典结构数据
+			var text = document.getElementById("mydata");//id为mydata的dom用来显示源数据文本
+
+        	function readFile(files) {
+				//该函数是入口，通过用户选择数据集文件被调用
+			    Z.readAsText(files,function(data,filename){
+			    	process_region(data);
+			    })
+			}
+
+			function process_region(data){
+				var dic={} //用于统计词频的字典
+
+				var regionData=JSON.parse(data);//将json格式的文本转化为对象格式
+				for(var region in regionData) {
+					//第一层遍历，针对各个地区
+
+					for (var animal of regionData[region]['pokemon']){
+						//第二层遍历，针对每个地区中的pokemon字段数组中的各个物种元素
+
+						//通过字典对各个物种出现的次数进行统计
+						if(dic.hasOwnProperty(animal)){ //判断字典中是否已有该词的key
+                            dic[animal]++;
+                        }else{
+                            dic[animal]=1;
+                        }
+					}
+
+				}
+
+				//将数据处理为词云图表可用的结构push到myData，顺便筛选掉频率较低的词；
+				for(var i in dic){
+	                if(dic[i]>=2){
+	                    myData.push({"name":i,"value":dic[i]})
+	                }
+	            }
+
+	            text.value=JSON.stringify(myData) //将对象格式的json数据转化为文本格式，传入textarea的文本框
+	            
+
+			}
+            
+            
+
+
+
+            var maskResource=new Image();//新建一个图片对象
+            maskResource.src=Z.getPikachu();//为图片指定src；getPikachu返回的是原图（mask.png）在 https://c.runoob.com/front-end/59/ 转换后获得的Base64编码文本；
+
+            var dom = document.getElementById("container");
+            var myChart = echarts.init(dom,null,Z.smartWH());
+            var option = {};
+            function echartsRender(){
+
+            	var data=JSON.parse(text.value);//获取textarea中的文本，并转换为对象格式
+
+	            option = {
+	                tooltip: {},
+	                series: [ {
+	                    type: 'wordCloud',
+	                    //词云不是官方echarts的功能，在 https://github.com/ecomfe/echarts-wordcloud 可以查看完整的技术文档说明
+	                    gridSize: 1,
+	                    sizeRange: [10, 50],
+	                    //rotationRange: [-90, 90],
+	                    width: 500,
+	                    height: 500,
+	                    textStyle: {
+	                        color: function () {
+	                            return 'rgb(' + [
+	                                Math.round(Math.random() * 160),
+	                                Math.round(Math.random() * 160),
+	                                Math.round(Math.random() * 160)
+	                            ].join(',') + ')';
+	                        }
+	                    },
+	                    emphasis: {
+	                        textStyle: {
+	                            shadowBlur: 10,
+	                            shadowColor: '#333'
+	                        }
+	                    },
+	                    maskImage: maskResource, //传入一张剪影图像，白色区域将被排除在绘图文本之外
+	                    //shape:"triangle",
+	                    data: data //传入数据
+	                } ]
+	            };
+
+	            myChart.setOption(option);
+	        }
+
+           
+        </script>
+    </body>
+</html>
